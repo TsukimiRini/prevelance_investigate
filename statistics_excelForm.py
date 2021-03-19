@@ -41,7 +41,7 @@ def check(repo_name):
 
     percent = float(commit_cross) / commit_total
     repo_name = repo_name.replace('-', '/', 1)
-    res = "{} Total: {}, Cross: {}, Percent: {}".format(
+    res = "{} {} {} {}".format(
         repo_name, commit_total, commit_cross, percent)
     print(res)
     # print("="*8, "check repo ", repo_name, "completed", "="*8)

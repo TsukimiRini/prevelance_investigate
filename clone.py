@@ -11,6 +11,7 @@ work_dir = "/home"
 json_file_pos = "yuailun/"
 
 app_cnt = 0
+repos_coll = []
 
 
 def cloneRepos(json_file):
@@ -45,9 +46,10 @@ def cloneRepos(json_file):
             if os.path.exists(os.path.join(download_path, repo_name, "app")):
                 print("repo {} cloned".format(name))
                 app_cnt += 1
-                with open(os.path.join(work_dir, json_file_pos + "repo_list"),
-                          'a') as repo_list:
-                    repo_list.write(repo_name + "\n")
+                repos_coll.append(item)
+                # with open(os.path.join(work_dir, json_file_pos + "repo_list"),
+                #           'w') as repo_list:
+                #     repo_list.write(repo_name + "\n")
             else:
                 with open(
                         os.path.join(work_dir, json_file_pos + "not_app_list"),
@@ -87,6 +89,10 @@ for i in range(10):
     json_file = json_file_pos + "android-java-repo-p" + str(page)
     cloneRepos(json_file)
     if app_cnt >= 100:
+        repo_dump = json.dumps(repos_coll)
+        with open(os.path.join(work_dir, json_file_pos + "repo_list"),
+                  'w') as repo_list:
+            repo_list.write(repo_dump)
         break
 
 # ifRepoIsApp("CymChad/BaseRecyclerViewAdapterHelper")
