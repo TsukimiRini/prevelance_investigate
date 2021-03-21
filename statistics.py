@@ -1,12 +1,25 @@
 import os
 from git.repo import Repo
+import json
+import xlwt
 
 # work_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repos"
 # work_dir = "/Users/tannpopo/Projects"
 work_dir = "/home/repos"
+row = 0
+wb = xlwt.Workbook(encoding='utf-8')
+newsheet = wb.add_sheet('sheet1', cell_overwrite_ok=True)
+newsheet.write(row, 0, "repo_name")
+newsheet.write(row, 1, "stars")
+newsheet.write(row, 2, "total")
+newsheet.write(row, 3, "cross")
+newsheet.write(row, 4, "percent")
 
 
-def check(repo_name):
+def check(repo_obj):
+    global row
+
+    repo_name = repo_obj["owner"]["login"] + "-" + repo_obj["name"]
     # print("="*8, "start to check repo ", repo_name, "="*8)
     commit_total = 0
     commit_cross = 0
@@ -40,9 +53,18 @@ def check(repo_name):
         #     commit_cross += 1
 
     percent = float(commit_cross) / commit_total
-    repo_name = repo_name.replace('-', '/', 1)
+    repo_name_full = repo_obj["full_name"]
+
+    # excel
+    row += 1
+    formula = 'HYPERLINK("{}", "{}")'.format(repo_obj["html_url"], repo_name_full)
+    newsheet.write(row, 0, xlwt.Formula(formula))
+    newsheet.write(row, 1, repo_obj["stargazers_count"])
+    newsheet.write(row, 2, commit_total)
+    newsheet.write(row, 3, commit_cross)
+    newsheet.write(row, 4, percent)
     res = "{} Total: {}, Cross: {}, Percent: {}".format(
-        repo_name, commit_total, commit_cross, percent)
+        repo_name_full, commit_total, commit_cross, percent)
     print(res)
     # print("="*8, "check repo ", repo_name, "completed", "="*8)
     return commit_total, commit_cross, percent
@@ -51,11 +73,14 @@ def check(repo_name):
 def allRepos():
     repo_list = "/home/yuailun/repo_list"
     with open(repo_list) as list_fd:
-        lines = [line.strip() for line in list_fd.readlines()]
-        assert (len(lines) == 100)
-        for line in lines:
-            assert (os.path.exists(os.path.join(work_dir, line)))
-            check(line)
+        json_obj = json.load(list_fd)
+        assert (len(json_obj) == 100)
+        for repo in json_obj:
+            assert (os.path.exists(
+                os.path.join(work_dir,
+                             repo["owner"]["login"] + "-" + repo["name"])))
+            check(repo)
+    wb.save('stats_res.xlsx')
 
 
 allRepos()
