@@ -2,14 +2,24 @@ import jieba
 import os
 from git.repo import Repo
 import json
+import wordninja
+from nltk.corpus import stopwords
 
 # repo_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repos"
 repo_dir = "/home/repos"
 word_bags = {}
+stop_words = stopwords.words('english')
+
+
+def check_contain_chinese(check_str):
+    for ch in check_str:
+        if u'\u4e00' <= ch <= u'\u9fff':
+            return True
+    return False
 
 
 def computeRepo(repo_name):
-    print(8 * '=', "start to handle repo ", repo_name, 8 * '=')
+    # print(8 * '=', "start to handle repo ", repo_name, 8 * '=')
     repo = Repo(os.path.join(repo_dir, repo_name))
     commits = list(repo.iter_commits())
 
@@ -24,13 +34,41 @@ def computeRepo(repo_name):
                     file) > 5 and file[-5:] == '.java':
                 kot_jav_cnt += 1
         if xml_cnt >= 1 and kot_jav_cnt >= 1:
-            for seg in jieba.cut(commit.message.lower(), cut_all=False):
-                if len(seg) > 1 and seg != '\t' and seg != '\n':
-                    if seg in word_bags:
-                        word_bags[seg] += 1
-                    else:
-                        word_bags[seg] = 1
-    print(8 * '=', "repo ", repo_name, "done", 8 * '=')
+            msg = commit.message.lower()
+            if (check_contain_chinese(msg)):
+                seg_list = jieba.cut(msg, cut_all=False)
+                cn = True
+            else:
+                seg_list = wordninja.split(commit.message.lower())
+                cn = False
+            for seg in seg_list:
+                if cn is True and check_contain_chinese(seg) is False:
+                    seg_split_again = wordninja.split(seg)
+                    for _seg in seg_split_again:
+                        if len(
+                                _seg
+                        ) > 1 and _seg != '\t' and _seg != '\n' and _seg != '\r\n' and _seg not in stop_words:
+                            if _seg in word_bags:
+                                word_bags[_seg] += 1
+                            else:
+                                word_bags[_seg] = 1
+                elif cn is True:
+                    if len(
+                            seg
+                    ) > 1 and seg != '\t' and seg != '\n' and seg != '\r\n':
+                        if seg in word_bags:
+                            word_bags[seg] += 1
+                        else:
+                            word_bags[seg] = 1
+                else:
+                    if len(
+                            seg
+                    ) > 1 and seg != '\t' and seg != '\n' and seg != '\r\n' and seg not in stop_words:
+                        if seg in word_bags:
+                            word_bags[seg] += 1
+                        else:
+                            word_bags[seg] = 1
+    # print(8 * '=', "repo ", repo_name, "done", 8 * '=')
 
 
 def goThroughAll():
