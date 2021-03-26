@@ -15,9 +15,18 @@ newsheet.write(row, 2, "total")
 newsheet.write(row, 3, "cross")
 newsheet.write(row, 4, "percent")
 
+commit_cnt = 0
+changed_files_cnt = 0
+all_commit_cnt = 0
+all_changed_cnt = 0
+
 
 def check(repo_obj):
     global row
+    global commit_cnt
+    global changed_files_cnt
+    global all_commit_cnt
+    global all_changed_cnt
 
     repo_name = repo_obj["owner"]["login"] + "-" + repo_obj["name"]
     # print("="*8, "start to check repo ", repo_name, "="*8)
@@ -31,15 +40,20 @@ def check(repo_obj):
     for idx, commit in enumerate(commits):
         xml_cnt = 0
         kot_jav_cnt = 0
+        all_commit_cnt += 1
 
         # if idx == len(commits)-1:
-        for file in list(commit.stats.files):
+        file_list = list(commit.stats.files)
+        all_changed_cnt += len(file_list)
+        for file in file_list:
             if len(file) > 4 and file[-4:] == '.xml':
                 xml_cnt += 1
             elif len(file) > 3 and file[-3:] == '.kt' or len(
                     file) > 5 and file[-5:] == '.java':
                 kot_jav_cnt += 1
         if xml_cnt >= 1 and kot_jav_cnt >= 1:
+            commit_cnt += 1
+            changed_files_cnt += len(file_list)
             commit_cross += 1
         #     break
         # diff_index = commit.diff(commits[idx+1])
@@ -57,7 +71,8 @@ def check(repo_obj):
 
     # excel
     row += 1
-    formula = 'HYPERLINK("{}", "{}")'.format(repo_obj["html_url"], repo_name_full)
+    formula = 'HYPERLINK("{}", "{}")'.format(repo_obj["html_url"],
+                                             repo_name_full)
     newsheet.write(row, 0, xlwt.Formula(formula))
     newsheet.write(row, 1, repo_obj["stargazers_count"])
     newsheet.write(row, 2, commit_total)
@@ -80,6 +95,10 @@ def allRepos():
                 os.path.join(work_dir,
                              repo["owner"]["login"] + "-" + repo["name"])))
             check(repo)
+    newsheet.write(row+1, 0, changed_files_cnt)
+    newsheet.write(row+1, 1, commit_cnt)
+    newsheet.write(row+1, 3, all_changed_cnt)
+    newsheet.write(row+1, 4, all_commit_cnt)
     wb.save('stats_res.xlsx')
 
 
