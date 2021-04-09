@@ -2,10 +2,12 @@ import requests
 import time
 import json
 import os
+from git.repo import Repo
+import re
 
 query_fmt = '''
 query Q {
-  search(query: "is:issue repo:%s/%s state:closed label:bug sort:created-desc", type: ISSUE, first: 100, %s) {
+  search(query: "repo:%s/%s state:closed label:bug sort:created-desc", type: ISSUE, first: 100, %s) {
     issueCount
     pageInfo {
       endCursor
@@ -30,6 +32,7 @@ query Q {
             nodes {
               ... on ReferencedEvent {
                 commit {
+                  message
                   url
                   committedDate
                   oid
@@ -44,8 +47,9 @@ query Q {
 }
 '''
 
-token = 'e7b88caf360ac34565c1553aed10676037395c54'
+token = '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'
 work_dir = "/home/repos"
+# work_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repo"
 # res_dir = "/Users/tannpopo/Documents/Study/ChangeLint/stats/events"
 res_dir = "/home/yuailun/bug_introducing_commits"
 
@@ -55,6 +59,7 @@ def getQuery(owner, repo_name, after):
 
 
 def getEventsOf(owner, repo_name):
+    fix_commits = []
     # res = requests.get("https://api.github.com/repos/{}/{}/events".format(owner, repo_name))
     referencePairs = {}
     after = ""
@@ -79,12 +84,16 @@ def getEventsOf(owner, repo_name):
         edges = search['edges']
 
         for event in edges:
+            if len(event['node']) == 0:
+                continue
             commits = event['node']['timelineItems']['nodes']
             if commits != []:
                 for commit in commits:
                     commit_ = commit['commit']
                     if commit_ is None:
                         continue
+                    if 'fix' in commit_['message']:
+                        fix_commits.append(commit_['oid'])
                     referencePairs[event['node']['number']] = {
                         "creationdate":
                         event['node']['createdAt'].replace('T', " ").replace(
@@ -114,6 +123,25 @@ def getEventsOf(owner, repo_name):
         after = 'after: "%s"' % search['edges'][-1]['cursor']
         time.sleep(1)
         id += 1
+
+    repo = Repo(os.path.join(work_dir, owner + '-' + repo_name))
+    commits = list(repo.iter_commits())
+    for idx, commit in enumerate(commits):
+        if 'fix' in commit.message and str(commit) not in fix_commits:
+            res = re.search(r'[+-]\d{2}:', str(commit.committed_datetime))
+            referencePairs[str(commit)] = {
+                "creationdate":
+                str(commit.committed_datetime)[:res.start()] + " +0000",
+                "resolutiondate":
+                str(commit.committed_datetime)[:res.start()] + " +0000",
+                "hash":
+                str(commit),
+                "commitdate":
+                str(commit.committed_datetime)[:res.start()] + " +0000",
+            }
+            evt_cnt += 1
+    print("{}/{} find {} fix commits in total".format(owner, repo_name,
+                                                      evt_cnt))
     if evt_cnt != 0:
         with open(os.path.join(res_dir, repo_name + "_issue.json"), "w") as fd:
             fd.write(json.dumps(referencePairs, indent=2))
@@ -141,3 +169,4 @@ def allRepos():
 
 
 allRepos()
+# getEventsOf('TeamNewPipe', "NewPipe")
