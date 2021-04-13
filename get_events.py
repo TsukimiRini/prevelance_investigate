@@ -4,6 +4,7 @@ import json
 import os
 from git.repo import Repo
 import re
+import sys
 
 query_fmt = '''
 query Q {
@@ -47,7 +48,7 @@ query Q {
 }
 '''
 
-token = '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'
+token = sys.argv[1]
 work_dir = "/home/repos"
 # work_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repo"
 # res_dir = "/Users/tannpopo/Documents/Study/ChangeLint/stats/events"
