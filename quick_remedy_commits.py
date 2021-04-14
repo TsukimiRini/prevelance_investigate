@@ -5,7 +5,7 @@ import json
 from sys import platform
 
 if platform == "darwin":
-    work_dir = "/Users/tannpopo/Projects"
+    work_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repo"
     stats_dir = "."
 else:
     work_dir = "/home/repos"
@@ -14,36 +14,49 @@ else:
 
 def getQRCommits(repo_name):
     commits_list = []
+    shas = set()
     repo = Repo(os.path.join(work_dir, repo_name))
-    commits = list(repo.iter_commits())
-    for idx, commit in enumerate(commits):
-        commit_collection = {}
-        xml_cnt = 0
-        kot_jav_cnt = 0
+    
+    for b in repo.remote().fetch():
+        if '/' not in b.name:
+            continue
+        print("start to check branch {} of {}".format(b.name, repo_name))
+        branch_name = b.name.split('/')[1]
+        repo.git.checkout('-B', branch_name, b.name)
+        commits = list(repo.iter_commits(branch_name))
 
-        file_list = list(commit.stats.files)
-        for file in file_list:
-            if len(file) > 4 and file[-4:] == '.xml':
-                xml_cnt += 1
-            elif len(file) > 3 and file[-3:] == '.kt' or len(
-                    file) > 5 and file[-5:] == '.java':
-                kot_jav_cnt += 1
-        if xml_cnt >= 1 and kot_jav_cnt >= 1:
-            if idx != 0:
-                time_next_commit = commits[
-                    idx - 1].committed_datetime - commit.committed_datetime
-                if time_next_commit.total_seconds() / 60 <= 30 and len(
-                        commit.parents) < 2:
-                    commit_collection["commit_id"] = str(commit)
-                    commit_collection["commit_msg"] = str.strip(commit.message)
-                    commit_collection["commit_time"] = str(
-                        commit.committed_datetime)
-                    commit_collection["remedy_id"] = str(commits[idx - 1])
-                    commit_collection["remedy_time"] = str(
-                        commits[idx - 1].committed_datetime)
-                    commit_collection["remedy_msg"] = str.strip(
-                        commits[idx - 1].message)
-                    commits_list.append(commit_collection)
+        for idx, commit in enumerate(commits):
+            if str(commit) in shas:
+                break
+            else:
+                shas.add(str(commit))
+            commit_collection = {}
+            xml_cnt = 0
+            kot_jav_cnt = 0
+
+            file_list = list(commit.stats.files)
+            for file in file_list:
+                if len(file) > 4 and file[-4:] == '.xml':
+                    xml_cnt += 1
+                elif len(file) > 3 and file[-3:] == '.kt' or len(
+                        file) > 5 and file[-5:] == '.java':
+                    kot_jav_cnt += 1
+            if xml_cnt >= 1 and kot_jav_cnt >= 1:
+                if idx != 0:
+                    time_next_commit = commits[
+                        idx - 1].committed_datetime - commit.committed_datetime
+                    if time_next_commit.total_seconds() / 60 <= 30 and len(
+                            commit.parents) < 2:
+                        commit_collection["commit_id"] = str(commit)
+                        commit_collection["commit_msg"] = str.strip(commit.message)
+                        commit_collection["commit_time"] = str(
+                            commit.committed_datetime)
+                        commit_collection["remedy_id"] = str(commits[idx - 1])
+                        commit_collection["remedy_time"] = str(
+                            commits[idx - 1].committed_datetime)
+                        commit_collection["remedy_msg"] = str.strip(
+                            commits[idx - 1].message)
+                        commits_list.append(commit_collection)
 
             # diff_files = []
             # if not commit.parents:
@@ -80,4 +93,4 @@ def allRepos():
 if platform == "linux":
     allRepos()
 elif platform == "darwin":
-    getQRCommits("three-D-demo-for-self-assembly")
+    getQRCommits("TeamNewPipe-NewPipe")
