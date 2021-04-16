@@ -29,6 +29,8 @@ def check(repo_name):
     repo = Repo(os.path.join(work_dir, repo_name))
     commits = list(repo.iter_commits())
     for idx, commit in enumerate(commits):
+        if len(commits[idx - 1].parents) > 1:
+            continue
         if idx == 0:
             continue
         xml_cnt = 0
@@ -73,6 +75,8 @@ def check(repo_name):
                                     quotechar='"',
                                     quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([commit_type, len(file_list)])
+        if len(file_list) == 0:
+            print("!!" + str(commits[idx - 1]))
         with open(os.path.join(csv_dir, metric_type[1] + ".csv"),
                   'a',
                   newline="") as csv_fd:
