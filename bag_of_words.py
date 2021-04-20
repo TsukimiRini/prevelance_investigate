@@ -4,16 +4,19 @@ from git.repo import Repo
 import json
 import wordninja
 from nltk.corpus import stopwords
-from translate import Translator
+from google_trans_new import google_translator
 import re
+from sys import platform
 
-# repo_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repos"
-repo_dir = "/home/repos"
+if platform == "darwin":
+    repo_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repo"
+if platform == "linux":
+    repo_dir = "/home/repos"
 plot_dir = "../plots"
 word_bags = {}
 stop_words = stopwords.words('english')
 
-translator = Translator(to_lang="English")
+translator = google_translator()
 reg = re.compile(r"[a-zA-z0-9']")
 
 
@@ -31,56 +34,70 @@ def checkEng(check_str):
 
 
 def computeRepo(repo_name):
+    shas = set()
     print(8 * '=', "start to handle repo ", repo_name, 8 * '=')
     repo = Repo(os.path.join(repo_dir, repo_name))
-    commits = list(repo.iter_commits())
+    for b in repo.remote().fetch():
+        if '/' not in b.name:
+            continue
+        print("start to check branch {} of {}".format(b.name, repo_name))
+        branch_name = b.name.split('/')[1]
+        repo.git.checkout('-B', branch_name, b.name)
+        commits = list(repo.iter_commits(branch_name))
 
-    for idx, commit in enumerate(commits):
-        xml_cnt = 0
-        kot_jav_cnt = 0
-
-        for file in list(commit.stats.files):
-            if len(file) > 4 and file[-4:] == '.xml':
-                xml_cnt += 1
-            elif len(file) > 3 and file[-3:] == '.kt' or len(
-                    file) > 5 and file[-5:] == '.java':
-                kot_jav_cnt += 1
-        if xml_cnt >= 1 and kot_jav_cnt >= 1:
-            msg = commit.message.lower()
-            if (check_contain_chinese(msg)):
-                seg_list = jieba.cut(msg, cut_all=False)
-                cn = True
+        for idx, commit in enumerate(commits):
+            if str(commit) in shas:
+                continue
             else:
-                seg_list = wordninja.split(commit.message.lower())
-                cn = False
-            for seg in seg_list:
-                if cn is True and check_contain_chinese(seg) is False:
-                    seg_split_again = wordninja.split(seg)
-                    for _seg in seg_split_again:
-                        if len(
-                                _seg
-                        ) > 1 and _seg != '\t' and _seg != '\n' and _seg != '\r\n' and _seg not in stop_words:
-                            if _seg in word_bags:
-                                word_bags[_seg] += 1
-                            else:
-                                word_bags[_seg] = 1
-                elif cn is True:
-                    seg = translator.translate(commit.message).lower()
-                    if len(
-                            seg
-                    ) > 1 and seg != '\t' and seg != '\n' and seg != '\r\n' and seg not in stop_words:
-                        if seg in word_bags:
-                            word_bags[seg] += 1
-                        else:
-                            word_bags[seg] = 1
+                shas.add(str(commit))
+            xml_cnt = 0
+            kot_jav_cnt = 0
+
+            for file in list(commit.stats.files):
+                if len(file) > 4 and file[-4:] == '.xml':
+                    xml_cnt += 1
+                elif len(file) > 3 and file[-3:] == '.kt' or len(
+                        file) > 5 and file[-5:] == '.java':
+                    kot_jav_cnt += 1
+            if xml_cnt >= 1 and kot_jav_cnt >= 1:
+                msg = commit.message
+                # msg = str.strip(
+                #     translator.translate(msg,
+                #                          lang_tgt='en')).lower()
+                # print(msg)
+                if (check_contain_chinese(msg)):
+                    seg_list = jieba.cut(msg, cut_all=False)
+                    cn = True
                 else:
-                    if len(
-                            seg
-                    ) > 1 and seg != '\t' and seg != '\n' and seg != '\r\n' and seg not in stop_words:
-                        if seg in word_bags:
-                            word_bags[seg] += 1
-                        else:
-                            word_bags[seg] = 1
+                    seg_list = wordninja.split(commit.message.lower())
+                    cn = False
+                for seg in seg_list:
+                    if cn is True and check_contain_chinese(seg) is False:
+                        seg_split_again = wordninja.split(seg)
+                        for _seg in seg_split_again:
+                            if len(
+                                    _seg
+                            ) > 1 and _seg != '\t' and _seg != '\n' and _seg != '\r\n' and _seg not in stop_words:
+                                if _seg in word_bags:
+                                    word_bags[_seg] += 1
+                                else:
+                                    word_bags[_seg] = 1
+                    elif cn is True:
+                        if len(
+                                seg
+                        ) > 1 and seg != '\t' and seg != '\n' and seg != '\r\n' and seg not in stop_words:
+                            if seg in word_bags:
+                                word_bags[seg] += 1
+                            else:
+                                word_bags[seg] = 1
+                    else:
+                        if len(
+                                seg
+                        ) > 1 and seg != '\t' and seg != '\n' and seg != '\r\n' and seg not in stop_words:
+                            if seg in word_bags:
+                                word_bags[seg] += 1
+                            else:
+                                word_bags[seg] = 1
     print(8 * '=', "repo ", repo_name, "done", 8 * '=')
 
 
@@ -104,5 +121,25 @@ def goThroughAll():
         for (word, freq) in word_freq:
             res_fd.write("{} {}\n".format(word, freq))
 
+    translated_dict = {}
+    for word, freq in word_bags.items():
+        translated = str.strip(translator.translate(
+            word, lang_tgt='en')).lower().split(' ')
+        for t in translated:
+            if t in translated_dict:
+                translated_dict[t] += freq
+            else:
+                translated_dict[t] = freq
+    translated_word_freq = []
+    for word, freq in translated_dict.items():
+        translated_word_freq.append((word, freq))
+    translated_word_freq.sort(key=lambda x: x[1], reverse=True)
+    with open("translated_bag_of_words_res", 'w') as res_fd:
+        for (word, freq) in translated_word_freq:
+            res_fd.write("{} {}\n".format(word, freq))
 
-goThroughAll()
+
+if platform == "linux":
+    goThroughAll()
+elif platform == "darwin":
+    computeRepo("Auto.js")
