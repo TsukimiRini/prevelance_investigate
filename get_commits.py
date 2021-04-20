@@ -47,7 +47,7 @@ def getCommits(repo_name):
             commits_list.append(commit_collection)
 
     repo_dump = json.dumps(commits_list, indent=2, ensure_ascii=False)
-    with open(os.path.join(stats_dir, repo_name + "_crossLangCommits"), "w") as commit_fd:
+    with open(os.path.join(stats_dir, repo_name + ".json"), "w") as commit_fd:
         commit_fd.write(repo_dump)
         print(repo_name + " done")
 

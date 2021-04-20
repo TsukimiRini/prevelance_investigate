@@ -4,11 +4,17 @@ from git.repo import Repo
 import json
 import wordninja
 from nltk.corpus import stopwords
+from translate import Translator
+import re
 
 # repo_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repos"
 repo_dir = "/home/repos"
+plot_dir = "../plots"
 word_bags = {}
 stop_words = stopwords.words('english')
+
+translator = Translator(to_lang="English")
+reg = re.compile(r"[a-zA-z0-9']")
 
 
 def check_contain_chinese(check_str):
@@ -18,8 +24,14 @@ def check_contain_chinese(check_str):
     return False
 
 
+def checkEng(check_str):
+    if reg.match(check_str):
+        return True
+    return False
+
+
 def computeRepo(repo_name):
-    # print(8 * '=', "start to handle repo ", repo_name, 8 * '=')
+    print(8 * '=', "start to handle repo ", repo_name, 8 * '=')
     repo = Repo(os.path.join(repo_dir, repo_name))
     commits = list(repo.iter_commits())
 
@@ -53,9 +65,10 @@ def computeRepo(repo_name):
                             else:
                                 word_bags[_seg] = 1
                 elif cn is True:
+                    seg = translator.translate(commit.message).lower()
                     if len(
                             seg
-                    ) > 1 and seg != '\t' and seg != '\n' and seg != '\r\n':
+                    ) > 1 and seg != '\t' and seg != '\n' and seg != '\r\n' and seg not in stop_words:
                         if seg in word_bags:
                             word_bags[seg] += 1
                         else:
@@ -68,7 +81,7 @@ def computeRepo(repo_name):
                             word_bags[seg] += 1
                         else:
                             word_bags[seg] = 1
-    # print(8 * '=', "repo ", repo_name, "done", 8 * '=')
+    print(8 * '=', "repo ", repo_name, "done", 8 * '=')
 
 
 def goThroughAll():
