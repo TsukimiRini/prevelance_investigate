@@ -19,6 +19,8 @@ stop_words = stopwords.words('english')
 translator = google_translator()
 reg = re.compile(r"[a-zA-z0-9']")
 
+chinese_mst_cnt = 0
+
 
 def check_contain_chinese(check_str):
     for ch in check_str:
@@ -34,6 +36,7 @@ def checkEng(check_str):
 
 
 def computeRepo(repo_name):
+    global chinese_mst_cnt
     shas = set()
     print(8 * '=', "start to handle repo ", repo_name, 8 * '=')
     repo = Repo(os.path.join(repo_dir, repo_name))
@@ -66,6 +69,13 @@ def computeRepo(repo_name):
                 #                          lang_tgt='en')).lower()
                 # print(msg)
                 if (check_contain_chinese(msg)):
+                    chinese_mst_cnt += 1
+                    try:
+                        msg = str.strip(
+                            translator.translate(msg, lang_tgt='en')).lower()
+                    except:
+                        print(chinese_mst_cnt)
+                        pass
                     seg_list = jieba.cut(msg, cut_all=False)
                     cn = True
                 else:
@@ -143,3 +153,5 @@ if platform == "linux":
     goThroughAll()
 elif platform == "darwin":
     computeRepo("Auto.js")
+
+print("chinese msg count:", chinese_mst_cnt)
