@@ -109,7 +109,7 @@ def drawPlot():
     plot = sns.histplot(data=data, y="percentage")
     ylabels = ['{:,.0f}'.format(x) + '%' for x in plot.get_yticks()]
     plot.set_yticklabels(ylabels)
-    plot.set(xlabel="Repository count", ylabel="Multi-lang commits percentage")
+    plot.set(xlabel="repository count", ylabel="multi-lang commits percentage")
     fig = plot.get_figure()
     fig.savefig(os.path.join(plot_dir, "multi-lang-percent.png"))
 
