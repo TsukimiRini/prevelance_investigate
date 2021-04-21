@@ -26,81 +26,93 @@ def check(repo_name):
     # global all_commit_cnt
     # global all_changed_cnt
 
+    shas = set()
     repo = Repo(os.path.join(work_dir, repo_name))
-    commits = list(repo.iter_commits())
-    for idx, commit in enumerate(commits):
-        if len(commits[idx - 1].parents) > 1:
+    for b in repo.remote().fetch():
+        if '/' not in b.name:
             continue
-        if idx == 0:
-            continue
-        xml_cnt = 0
-        kot_jav_cnt = 0
+        print("start to check branch {} of {}".format(b.name, repo_name))
+        branch_name = b.name.split('/')[1]
+        repo.git.checkout('-B', branch_name, b.name)
+        commits = list(repo.iter_commits())
+        for idx, commit in enumerate(commits):
+            if str(commit) in shas:
+                continue
+            else:
+                shas.add(str(commit))
+            if len(commits[idx - 1].parents) > 1:
+                continue
+            if idx == 0:
+                continue
+            xml_cnt = 0
+            kot_jav_cnt = 0
 
-        # if idx == len(commits)-1:
-        file_list = list(commits[idx - 1].stats.files)
-        for file in file_list:
-            if len(file) > 4 and file[-4:] == '.xml':
-                xml_cnt += 1
-            elif len(file) > 3 and file[-3:] == '.kt' or len(
-                    file) > 5 and file[-5:] == '.java':
-                kot_jav_cnt += 1
+            # if idx == len(commits)-1:
+            file_list = list(commits[idx - 1].stats.files)
+            for file in file_list:
+                if len(file) > 4 and file[-4:] == '.xml':
+                    xml_cnt += 1
+                elif len(file) > 3 and file[-3:] == '.kt' or len(
+                        file) > 5 and file[-5:] == '.java':
+                    kot_jav_cnt += 1
 
-        patch = repo.git.diff(commit.tree, commits[idx - 1].tree).split('\n')
-        hunks_cnt = 0
-        added = 0
-        deleted = 0
-        for line in patch:
-            if len(line) >= 2 and line[0] == '@' and line[1] == '@':
-                hunks_cnt += 1
-            elif len(line) >= 1 and line[0] == '+' and (len(line) < 3
-                                                        or line[1] != '+'
-                                                        or line[2] != '+'):
-                added += 1
-            elif len(line) >= 1 and line[0] == '-' and (len(line) < 3
-                                                        or line[1] != '-'
-                                                        or line[2] != '-'):
-                deleted += 1
+            patch = repo.git.diff(commit.tree,
+                                  commits[idx - 1].tree).split('\n')
+            hunks_cnt = 0
+            added = 0
+            deleted = 0
+            for line in patch:
+                if len(line) >= 2 and line[0] == '@' and line[1] == '@':
+                    hunks_cnt += 1
+                elif len(line) >= 1 and line[0] == '+' and (len(line) < 3
+                                                            or line[1] != '+'
+                                                            or line[2] != '+'):
+                    added += 1
+                elif len(line) >= 1 and line[0] == '-' and (len(line) < 3
+                                                            or line[1] != '-'
+                                                            or line[2] != '-'):
+                    deleted += 1
 
-        commit_type = ""
-        if xml_cnt >= 1 and kot_jav_cnt >= 1:
-            commit_type = "Multi-lang"
-        else:
-            commit_type = "Normal"
+            commit_type = ""
+            if xml_cnt >= 1 and kot_jav_cnt >= 1:
+                commit_type = "Multi-lang"
+            else:
+                commit_type = "Normal"
 
-        with open(os.path.join(csv_dir, metric_type[0] + ".csv"),
-                  'a',
-                  newline="") as csv_fd:
-            csv_writer = csv.writer(csv_fd,
-                                    delimiter=',',
-                                    quotechar='"',
-                                    quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([commit_type, len(file_list)])
-        if len(file_list) == 0:
-            print("!!" + str(commits[idx - 1]))
-        with open(os.path.join(csv_dir, metric_type[1] + ".csv"),
-                  'a',
-                  newline="") as csv_fd:
-            csv_writer = csv.writer(csv_fd,
-                                    delimiter=',',
-                                    quotechar='"',
-                                    quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([commit_type, hunks_cnt])
-        with open(os.path.join(csv_dir, metric_type[2] + ".csv"),
-                  'a',
-                  newline="") as csv_fd:
-            csv_writer = csv.writer(csv_fd,
-                                    delimiter=',',
-                                    quotechar='"',
-                                    quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([commit_type, added])
-        with open(os.path.join(csv_dir, metric_type[3] + ".csv"),
-                  'a',
-                  newline="") as csv_fd:
-            csv_writer = csv.writer(csv_fd,
-                                    delimiter=',',
-                                    quotechar='"',
-                                    quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([commit_type, deleted])
+            with open(os.path.join(csv_dir, metric_type[0] + ".csv"),
+                      'a',
+                      newline="") as csv_fd:
+                csv_writer = csv.writer(csv_fd,
+                                        delimiter=',',
+                                        quotechar='"',
+                                        quoting=csv.QUOTE_MINIMAL)
+                csv_writer.writerow([commit_type, len(file_list)])
+            if len(file_list) == 0:
+                print("!!" + str(commits[idx - 1]))
+            with open(os.path.join(csv_dir, metric_type[1] + ".csv"),
+                      'a',
+                      newline="") as csv_fd:
+                csv_writer = csv.writer(csv_fd,
+                                        delimiter=',',
+                                        quotechar='"',
+                                        quoting=csv.QUOTE_MINIMAL)
+                csv_writer.writerow([commit_type, hunks_cnt])
+            with open(os.path.join(csv_dir, metric_type[2] + ".csv"),
+                      'a',
+                      newline="") as csv_fd:
+                csv_writer = csv.writer(csv_fd,
+                                        delimiter=',',
+                                        quotechar='"',
+                                        quoting=csv.QUOTE_MINIMAL)
+                csv_writer.writerow([commit_type, added])
+            with open(os.path.join(csv_dir, metric_type[3] + ".csv"),
+                      'a',
+                      newline="") as csv_fd:
+                csv_writer = csv.writer(csv_fd,
+                                        delimiter=',',
+                                        quotechar='"',
+                                        quoting=csv.QUOTE_MINIMAL)
+                csv_writer.writerow([commit_type, deleted])
         #     break
         # diff_index = commit.diff(commits[idx+1])
 
