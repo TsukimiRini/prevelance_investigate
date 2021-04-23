@@ -28,7 +28,6 @@ for metric in metric_type:
     fig = plot.get_figure()
     fig.savefig(os.path.join(plot_dir, metric + ".png"))
     fig.clf()
-
 # for metric in metric_type:
 #     sns.set_theme(style="whitegrid")
 #     data = pd.read_csv(os.path.join(csv_dir, metric + ".csv"))

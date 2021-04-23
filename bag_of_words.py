@@ -17,7 +17,10 @@ word_bags = {}
 stop_words = stopwords.words('english')
 
 translator = google_translator()
-reg = re.compile(r"[a-zA-z0-9']")
+reg = re.compile(r"[a-zA-z0-9']+")
+reg_issue = re.compile(r"#[0-9]+")
+
+issue_cnt = 0
 
 chinese_mst_cnt = 0
 
@@ -36,6 +39,7 @@ def checkEng(check_str):
 
 
 def computeRepo(repo_name):
+    global issue_cnt
     global chinese_mst_cnt
     shas = set()
     print(8 * '=', "start to handle repo ", repo_name, 8 * '=')
@@ -68,18 +72,15 @@ def computeRepo(repo_name):
                 #     translator.translate(msg,
                 #                          lang_tgt='en')).lower()
                 # print(msg)
+                if reg_issue.search(msg) and len(commit.parents) < 2:
+                    msg = "fix " + msg
+                    issue_cnt += 1
                 if (check_contain_chinese(msg)):
                     chinese_mst_cnt += 1
-                    try:
-                        msg = str.strip(
-                            translator.translate(msg, lang_tgt='en')).lower()
-                    except:
-                        print(chinese_mst_cnt)
-                        pass
                     seg_list = jieba.cut(msg, cut_all=False)
                     cn = True
                 else:
-                    seg_list = wordninja.split(commit.message.lower())
+                    seg_list = wordninja.split(msg.lower())
                     cn = False
                 for seg in seg_list:
                     if cn is True and check_contain_chinese(seg) is False:
@@ -131,26 +132,27 @@ def goThroughAll():
         for (word, freq) in word_freq:
             res_fd.write("{} {}\n".format(word, freq))
 
-    translated_dict = {}
-    for word, freq in word_bags.items():
-        translated = str.strip(translator.translate(
-            word, lang_tgt='en')).lower().split(' ')
-        for t in translated:
-            if t in translated_dict:
-                translated_dict[t] += freq
-            else:
-                translated_dict[t] = freq
-    translated_word_freq = []
-    for word, freq in translated_dict.items():
-        translated_word_freq.append((word, freq))
-    translated_word_freq.sort(key=lambda x: x[1], reverse=True)
-    with open("translated_bag_of_words_res", 'w') as res_fd:
-        for (word, freq) in translated_word_freq:
-            res_fd.write("{} {}\n".format(word, freq))
+    # translated_dict = {}
+    # for word, freq in word_bags.items():
+    #     translated = str.strip(translator.translate(
+    #         word, lang_tgt='en')).lower().split(' ')
+    #     for t in translated:
+    #         if t in translated_dict:
+    #             translated_dict[t] += freq
+    #         else:
+    #             translated_dict[t] = freq
+    # translated_word_freq = []
+    # for word, freq in translated_dict.items():
+    #     translated_word_freq.append((word, freq))
+    # translated_word_freq.sort(key=lambda x: x[1], reverse=True)
+    # with open("translated_bag_of_words_res", 'w') as res_fd:
+    #     for (word, freq) in translated_word_freq:
+    #         res_fd.write("{} {}\n".format(word, freq))
 
 
 if platform == "linux":
     goThroughAll()
+    print("issue in msg:", issue_cnt)
 elif platform == "darwin":
     computeRepo("Auto.js")
 
