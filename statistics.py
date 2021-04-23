@@ -34,37 +34,49 @@ def check(repo_obj):
     commit_cross = 0
     percent = 0
 
+    shas = set()
     repo = Repo(os.path.join(work_dir, repo_name))
-    commits = list(repo.iter_commits())
-    commit_total = len(commits)
-    for idx, commit in enumerate(commits):
-        xml_cnt = 0
-        kot_jav_cnt = 0
-        all_commit_cnt += 1
+    for b in repo.remote().fetch():
+        if '/' not in b.name:
+            continue
+        print("start to check branch {} of {}".format(b.name, repo_name))
+        branch_name = b.name.split('/')[1]
+        repo.git.checkout('-B', branch_name, b.name)
+        commits = list(repo.iter_commits('remotes/' + b.name))
+        commit_total = len(commits)
+        for idx, commit in enumerate(commits):
+            xml_cnt = 0
+            kot_jav_cnt = 0
+            all_commit_cnt += 1
 
-        # if idx == len(commits)-1:
-        file_list = list(commit.stats.files)
-        all_changed_cnt += len(file_list)
-        for file in file_list:
-            if len(file) > 4 and file[-4:] == '.xml':
-                xml_cnt += 1
-            elif len(file) > 3 and file[-3:] == '.kt' or len(
-                    file) > 5 and file[-5:] == '.java':
-                kot_jav_cnt += 1
-        if xml_cnt >= 1 and kot_jav_cnt >= 1:
-            commit_cnt += 1
-            changed_files_cnt += len(file_list)
-            commit_cross += 1
-        #     break
-        # diff_index = commit.diff(commits[idx+1])
+            if str(commit) in shas:
+                continue
+            else:
+                shas.add(str(commit))
 
-        # for diff_item in diff_index:
-        #     if diff_item.a_path[-4:] == '.xml':
-        #         xml_cnt += 1
-        #     elif diff_item.a_path[-3:] == '.kt' or diff_item.a_path[-5:] == '.java':
-        #         kot_jav_cnt += 1
-        # if xml_cnt >= 1 and kot_jav_cnt >= 1:
-        #     commit_cross += 1
+            # if idx == len(commits)-1:
+            file_list = list(commit.stats.files)
+            all_changed_cnt += len(file_list)
+            for file in file_list:
+                if len(file) > 4 and file[-4:] == '.xml':
+                    xml_cnt += 1
+                elif len(file) > 3 and file[-3:] == '.kt' or len(
+                        file) > 5 and file[-5:] == '.java':
+                    kot_jav_cnt += 1
+            if xml_cnt >= 1 and kot_jav_cnt >= 1:
+                commit_cnt += 1
+                changed_files_cnt += len(file_list)
+                commit_cross += 1
+            #     break
+            # diff_index = commit.diff(commits[idx+1])
+
+            # for diff_item in diff_index:
+            #     if diff_item.a_path[-4:] == '.xml':
+            #         xml_cnt += 1
+            #     elif diff_item.a_path[-3:] == '.kt' or diff_item.a_path[-5:] == '.java':
+            #         kot_jav_cnt += 1
+            # if xml_cnt >= 1 and kot_jav_cnt >= 1:
+            #     commit_cross += 1
 
     percent = float(commit_cross) / commit_total
     repo_name_full = repo_obj["full_name"]
@@ -95,10 +107,10 @@ def allRepos():
                 os.path.join(work_dir,
                              repo["owner"]["login"] + "-" + repo["name"])))
             check(repo)
-    newsheet.write(row+1, 0, changed_files_cnt)
-    newsheet.write(row+1, 1, commit_cnt)
-    newsheet.write(row+1, 3, all_changed_cnt)
-    newsheet.write(row+1, 4, all_commit_cnt)
+    newsheet.write(row + 1, 0, changed_files_cnt)
+    newsheet.write(row + 1, 1, commit_cnt)
+    newsheet.write(row + 1, 3, all_changed_cnt)
+    newsheet.write(row + 1, 4, all_commit_cnt)
     wb.save('stats_res.xlsx')
 
 

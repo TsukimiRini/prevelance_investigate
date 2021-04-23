@@ -12,7 +12,10 @@ elif platform == "linux":
     work_dir = "/home/repos"
     csv_dir = "/home/yuailun/plot_data"
 
-metric_type = ["changed files", "diff hunks", "added lines", "deleted lines", "modified directories"]
+metric_type = [
+    "changed files", "diff hunks", "added lines", "deleted lines",
+    "modified directories"
+]
 
 # commit_cnt = 0
 # changed_files_cnt = 0
@@ -36,9 +39,9 @@ def check(repo_name):
         if '/' not in b.name:
             continue
         print("start to check branch {} of {}".format(b.name, repo_name))
-        branch_name = b.name.split('/')[1]
-        repo.git.checkout('-B', branch_name, b.name)
-        commits = list(repo.iter_commits())
+        # branch_name = b.name.split('/')[1]
+        # repo.git.checkout('-B', branch_name, b.name)
+        commits = list(repo.iter_commits('remotes/' + b.name))
         for idx, commit in enumerate(commits):
             if str(commit) in shas:
                 continue
