@@ -283,7 +283,7 @@ def getType(word, freq):
         return "meaningless"
     elif noCh.match(word):
         return "meaningless"
-    elif freq <= 1:
+    elif freq <= 10:
         return "meaningless"
     return "others"
 
@@ -293,11 +293,20 @@ def drawPie():
     fig1, ax1 = plt.subplots()
     freq_arr = np.array(freqs)
     percent = 100. * freq_arr / freq_arr.sum()
+
+    colors = [
+        'BurlyWood', "CadetBlue", "Chocolate", "Crimson", "Coral", "OliveDrab",
+        "RebeccaPurple", "DarkSeaGreen", "Maroon", "DarkSlateBlue"
+    ]
+    for idx, label in enumerate(labels):
+        if label == "others":
+            colors[idx] = 'Gainsboro'
+
     patches, texts = ax1.pie(
         freqs,
         # labels=labels,
         # autopct='%1.1f%%',
-        shadow=True,
+        colors=colors,
         startangle=90)
     labels = ['{0} - {1:1.2f} %'.format(i, j) for i, j in zip(labels, percent)]
 
