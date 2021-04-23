@@ -12,6 +12,7 @@ python3 repo_multilang_percent_plot.py
 <img src="https://github.com/TsukimiRini/prevelance_investigate/blob/master/plot_gen/plots/hunks.png?raw=true" width="260px" alt="hunks"/>
 <img src="https://github.com/TsukimiRini/prevelance_investigate/blob/master/plot_gen/plots/added%20lines.png?raw=true" width="260px" alt="added lines"/>
 <img src="https://github.com/TsukimiRini/prevelance_investigate/blob/master/plot_gen/plots/deleted%20lines.png?raw=true" width="260px" alt="deleted lines"/>
+<img src="https://github.com/TsukimiRini/prevelance_investigate/blob/master/plot_gen/plots/modified%20directories.png?raw=true" width="260px" alt="modified directories"/>
 
 ### multi-lang commits percentage
 <img src="https://github.com/TsukimiRini/prevelance_investigate/blob/master/plot_gen/plots/multi-lang-percent.png?raw=true" alt="multi-lang commits percentage"/>
