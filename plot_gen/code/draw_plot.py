@@ -3,7 +3,10 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 
-metric_type = ["changed files", "hunks", "added lines", "deleted lines"]
+metric_type = [
+    "changed files", "hunks", "added lines", "deleted lines",
+    "modified directories"
+]
 csv_dir = "../csv"
 plot_dir = "../plots"
 

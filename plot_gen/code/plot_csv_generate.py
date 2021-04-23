@@ -12,7 +12,7 @@ elif platform == "linux":
     work_dir = "/home/repos"
     csv_dir = "/home/yuailun/plot_data"
 
-metric_type = ["changed files", "hunks", "added lines", "deleted lines"]
+metric_type = ["changed files", "hunks", "added lines", "deleted lines", "modified directories"]
 
 # commit_cnt = 0
 # changed_files_cnt = 0
@@ -49,12 +49,21 @@ def check(repo_name):
 
             # if idx == len(commits)-1:
             file_list = list(commits[idx - 1].stats.files)
+            dir_set = set()
             for file in file_list:
+                file = file.split(' => ')[-1]
+                dir = file.split('/')[0]
+                if dir == file:
+                    dir_set.add('.')
+                else:
+                    dir_set.add(dir)
                 if len(file) > 4 and file[-4:] == '.xml':
                     xml_cnt += 1
                 elif len(file) > 3 and file[-3:] == '.kt' or len(
                         file) > 5 and file[-5:] == '.java':
                     kot_jav_cnt += 1
+
+            dir_cnt = len(dir_set)
 
             patch = repo.git.diff(commit.tree,
                                   commits[idx - 1].tree).split('\n')
@@ -113,6 +122,14 @@ def check(repo_name):
                                         quotechar='"',
                                         quoting=csv.QUOTE_MINIMAL)
                 csv_writer.writerow([commit_type, deleted])
+            with open(os.path.join(csv_dir, metric_type[4] + ".csv"),
+                      'a',
+                      newline="") as csv_fd:
+                csv_writer = csv.writer(csv_fd,
+                                        delimiter=',',
+                                        quotechar='"',
+                                        quoting=csv.QUOTE_MINIMAL)
+                csv_writer.writerow([commit_type, dir_cnt])
         #     break
         # diff_index = commit.diff(commits[idx+1])
 
