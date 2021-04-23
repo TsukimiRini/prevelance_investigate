@@ -116,8 +116,10 @@ def allRepos():
 
 
 def drawPlot():
+    sns.set_theme(style="ticks", palette="pastel")
     data = pd.read_csv(os.path.join(csv_dir, "multi-lang-percent.csv"))
-    plot = sns.histplot(data=data, y="percentage")
+    plot = sns.histplot(data=data, y="percentage", binwidth=10, binrange=(0, 80), color="#7a95c4")
+    # plot.set_ylim(bottom=0)
     ylabels = ['{:,.0f}'.format(x) + '%' for x in plot.get_yticks()]
     plot.set_yticklabels(ylabels)
     plot.set(xlabel="repository count", ylabel="multi-lang commits percentage")

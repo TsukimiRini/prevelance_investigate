@@ -1,7 +1,6 @@
 import seaborn as sns
 import pandas as pd
 import os
-from sys import platform
 import matplotlib.pyplot as plt
 
 metric_type = ["changed files", "hunks", "added lines", "deleted lines"]
@@ -11,7 +10,7 @@ plot_dir = "../plots"
 for metric in metric_type:
     sns.set_theme(style="ticks", palette="pastel")
     data = pd.read_csv(os.path.join(csv_dir, metric + ".csv"))
-    f = plt.figure(figsize=[4,6])
+    f = plt.figure(figsize=[4, 6])
     ax = f.add_subplot(111)
     plot = sns.boxplot(x="commit type",
                        y=metric + " count",
@@ -26,8 +25,6 @@ for metric in metric_type:
     fig = plot.get_figure()
     fig.savefig(os.path.join(plot_dir, metric + ".png"))
     fig.clf()
-
-
 
 # for metric in metric_type:
 #     sns.set_theme(style="whitegrid")
