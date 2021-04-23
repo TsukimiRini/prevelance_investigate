@@ -4,7 +4,7 @@ import os
 import matplotlib.pyplot as plt
 
 metric_type = [
-    "changed files", "hunks", "added lines", "deleted lines",
+    "changed files", "diff hunks", "added lines", "deleted lines",
     "modified directories"
 ]
 csv_dir = "../csv"
@@ -18,12 +18,15 @@ for metric in metric_type:
     plot = sns.boxplot(x="commit type",
                        y=metric + " count",
                        data=data,
-                       order=["Multi-lang", "Normal"],
+                       order=["Multi-lang", "Other"],
                        fliersize=2,
                        palette=["m", "g"],
                        dodge=False,
                        ax=ax)
     plot.set_yscale("log")
+    plot.set_ylim(bottom=1)
+    plot.set_ylabel("Number of " + metric)
+    plot.set_xlabel("")
     f.tight_layout()
     fig = plot.get_figure()
     fig.savefig(os.path.join(plot_dir, metric + ".png"))

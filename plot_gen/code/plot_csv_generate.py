@@ -12,12 +12,14 @@ elif platform == "linux":
     work_dir = "/home/repos"
     csv_dir = "/home/yuailun/plot_data"
 
-metric_type = ["changed files", "hunks", "added lines", "deleted lines", "modified directories"]
+metric_type = ["changed files", "diff hunks", "added lines", "deleted lines", "modified directories"]
 
 # commit_cnt = 0
 # changed_files_cnt = 0
 # all_commit_cnt = 0
 # all_changed_cnt = 0
+multi_lang = 0
+other = 0
 
 
 def check(repo_name):
@@ -25,6 +27,8 @@ def check(repo_name):
     # global changed_files_cnt
     # global all_commit_cnt
     # global all_changed_cnt
+    global multi_lang
+    global other
 
     shas = set()
     repo = Repo(os.path.join(work_dir, repo_name))
@@ -85,8 +89,10 @@ def check(repo_name):
             commit_type = ""
             if xml_cnt >= 1 and kot_jav_cnt >= 1:
                 commit_type = "Multi-lang"
+                multi_lang += 1
             else:
-                commit_type = "Normal"
+                commit_type = "Other"
+                other += 1
 
             with open(os.path.join(csv_dir, metric_type[0] + ".csv"),
                       'a',
@@ -168,3 +174,4 @@ if platform == "darwin":
     check("three-D-demo-for-self-assembly")
 elif platform == "linux":
     allRepos()
+    print("multi-lang:{} other:{}".format(multi_lang, other))

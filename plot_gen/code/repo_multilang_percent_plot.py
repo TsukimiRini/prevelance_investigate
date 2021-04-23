@@ -122,7 +122,7 @@ def drawPlot():
     # plot.set_ylim(bottom=0)
     ylabels = ['{:,.0f}'.format(x) + '%' for x in plot.get_yticks()]
     plot.set_yticklabels(ylabels)
-    plot.set(xlabel="repository count", ylabel="multi-lang commits percentage")
+    plot.set(xlabel="Number of repositories", ylabel="Percentage of multi-lang commits")
     fig = plot.get_figure()
     fig.savefig(os.path.join(plot_dir, "multi-lang-percent.png"))
 
