@@ -2,15 +2,11 @@ import os
 from git.repo import Repo
 import json
 import csv
-from sys import platform
+import sys
 
-if platform == "darwin":
-    # work_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repo"
-    work_dir = "/Users/tannpopo/Projects"
-    csv_dir = "."
-elif platform == "linux":
-    work_dir = "/home/repos"
-    csv_dir = "/home/yuailun/plot_data"
+work_dir = sys.argv[1]
+csv_dir = sys.argv[2]
+repo_list = sys.argv[3]
 
 metric_type = [
     "changed files", "diff hunks", "added lines", "deleted lines",
@@ -153,7 +149,6 @@ def check(repo_name):
 
 
 def allRepos():
-    repo_list = "/home/yuailun/repo_list"
     with open(repo_list) as list_fd:
         json_obj = json.load(list_fd)
         assert (len(json_obj) == 100)
@@ -172,9 +167,5 @@ for t in metric_type:
                                 quoting=csv.QUOTE_MINIMAL)
         csv_writer.writerow(["commit type", t + " count"])
 
-if platform == "darwin":
-    # check("TeamNewPipe-NewPipe")
-    check("three-D-demo-for-self-assembly")
-elif platform == "linux":
-    allRepos()
-    print("multi-lang:{} other:{}".format(multi_lang, other))
+allRepos()
+print("multi-lang:{} other:{}".format(multi_lang, other))

@@ -6,13 +6,11 @@ import wordninja
 from nltk.corpus import stopwords
 from google_trans_new import google_translator
 import re
-from sys import platform
+import sys
 
-if platform == "darwin":
-    repo_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repo"
-if platform == "linux":
-    repo_dir = "/home/repos"
-plot_dir = "../plots"
+repo_dir = sys.argv[1]
+plot_dir = sys.argv[2]
+repo_list = sys.argv[3]
 word_bags = {}
 stop_words = stopwords.words('english')
 
@@ -113,7 +111,6 @@ def computeRepo(repo_name):
 
 
 def goThroughAll():
-    repo_list = "/home/yuailun/repo_list"
     with open(repo_list) as list_fd:
         json_obj = json.load(list_fd)
         assert (len(json_obj) == 100)
@@ -150,10 +147,4 @@ def goThroughAll():
     #         res_fd.write("{} {}\n".format(word, freq))
 
 
-if platform == "linux":
-    goThroughAll()
-    print("issue in msg:", issue_cnt)
-elif platform == "darwin":
-    computeRepo("Auto.js")
-
-print("chinese msg count:", chinese_mst_cnt)
+goThroughAll()

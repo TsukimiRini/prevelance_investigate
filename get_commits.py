@@ -2,10 +2,11 @@
 import os
 from git.repo import Repo
 import json
+import sys
 
-# work_dir = "/Users/tannpopo/Projects"
-work_dir = "/home/repos"
-stats_dir = "/home/yuailun/cross-lang-commits"
+work_dir = sys.argv[1]
+stats_dir = sys.argv[2]
+repo_list = sys.argv[3]
 
 
 def getCommits(repo_name):
@@ -66,7 +67,6 @@ def getCommits(repo_name):
 
 
 def allRepos():
-    repo_list = "/home/yuailun/repo_list"
     with open(repo_list) as list_fd:
         json_obj = json.load(list_fd)
         assert (len(json_obj) == 100)

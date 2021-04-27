@@ -2,10 +2,9 @@ import os
 from git.repo import Repo
 import json
 import xlwt
+import sys
 
-# work_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repos"
-# work_dir = "/Users/tannpopo/Projects"
-work_dir = "/home/repos"
+work_dir = sys.argv[1]
 row = 0
 wb = xlwt.Workbook(encoding='utf-8')
 newsheet = wb.add_sheet('sheet1', cell_overwrite_ok=True)
@@ -100,7 +99,7 @@ def check(repo_obj):
 
 
 def allRepos():
-    repo_list = "/home/yuailun/repo_list"
+    repo_list = sys.argv[2]
     with open(repo_list) as list_fd:
         json_obj = json.load(list_fd)
         assert (len(json_obj) == 100)
@@ -113,7 +112,7 @@ def allRepos():
     newsheet.write(row + 1, 1, commit_cnt)
     newsheet.write(row + 1, 3, all_changed_cnt)
     newsheet.write(row + 1, 4, all_commit_cnt)
-    wb.save('stats_res.xlsx')
+    wb.save('stats_res.xls')
 
 
 allRepos()

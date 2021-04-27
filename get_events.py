@@ -49,10 +49,9 @@ query Q {
 '''
 
 token = sys.argv[1]
-work_dir = "/home/repos"
-# work_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repo"
-# res_dir = "/Users/tannpopo/Documents/Study/ChangeLint/stats/events"
-res_dir = "/home/yuailun/bug_introducing_commits"
+work_dir = sys.argv[2]
+res_dir = sys.argv[3]
+repo_list = sys.argv[4]
 
 
 def getQuery(owner, repo_name, after):
@@ -154,7 +153,6 @@ def getEventsOf(owner, repo_name):
 
 def allRepos():
     all_cnt = 0
-    repo_list = "/home/yuailun/repo_list"
     fd = open("evet_list", "w")
     fd.close()
     with open(repo_list) as list_fd:

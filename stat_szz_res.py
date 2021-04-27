@@ -1,12 +1,11 @@
 import os
 import json
 from git import Repo
+import sys
 
-szz_dir = "/home/yuailun/szz_res"
-repo_dir = "/home/repos"
-# repo_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repo"
-# szz_dir = "/Users/tannpopo/Documents/Study/ChangeLint/szz"
-list_path = "/home/yuailun/prevalence/evet_list"
+szz_dir = sys.argv[1]
+repo_dir = sys.argv[2]
+list_path = sys.argv[3]
 
 all_commit_cnt = 0
 commit_cross = 0

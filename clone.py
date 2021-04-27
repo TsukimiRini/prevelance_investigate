@@ -4,11 +4,10 @@ from git import rmtree
 import git
 import json
 import requests
+import sys
 
-# work_dir = "/Users/tannpopo/Documents/Study/ChangeLint"
-work_dir = "/home"
-# json_file = "yuailun/android-java-repo"
-json_file_pos = "yuailun/"
+work_dir = sys.argv[1]
+json_file_pos = sys.argv[2]
 
 app_cnt = 0
 repos_coll = []

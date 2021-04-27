@@ -1,21 +1,18 @@
 import os
 from git.repo import Repo
 import json
-from sys import platform
 import csv
 import seaborn as sns
 import pandas as pd
+import sys
 
-# work_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repos"
-# work_dir = "/Users/tannpopo/Projects"
-if platform == "darwin":
-    # work_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repo"
-    work_dir = "/Users/tannpopo/Projects"
+if sys.argv[1] == "plot":
+    work_dir = sys.argv[2]
     csv_dir = "../csv"
     plot_dir = "../plots"
-elif platform == "linux":
-    work_dir = "/home/repos"
-    csv_dir = "/home/yuailun/plot_data"
+elif sys.argv[1] == "data":
+    work_dir = sys.argv[2]
+    csv_dir = "../csv"
 row = 0
 
 commit_cnt = 0
@@ -118,16 +115,21 @@ def allRepos():
 def drawPlot():
     sns.set_theme(style="ticks", palette="pastel")
     data = pd.read_csv(os.path.join(csv_dir, "multi-lang-percent.csv"))
-    plot = sns.histplot(data=data, y="percentage", binwidth=10, binrange=(0, 80), color="#7a95c4")
+    plot = sns.histplot(data=data,
+                        y="percentage",
+                        binwidth=10,
+                        binrange=(0, 80),
+                        color="#7a95c4")
     # plot.set_ylim(bottom=0)
     ylabels = ['{:,.0f}'.format(x) + '%' for x in plot.get_yticks()]
     plot.set_yticklabels(ylabels)
-    plot.set(xlabel="Number of repositories", ylabel="Percentage of multi-lang commits")
+    plot.set(xlabel="Number of repositories",
+             ylabel="Percentage of multi-lang commits")
     fig = plot.get_figure()
     fig.savefig(os.path.join(plot_dir, "multi-lang-percent.png"))
 
 
-if platform == "linux":
+if sys.argv[1] == "data":
     allRepos()
-elif platform == "darwin":
+elif sys.argv[1] == "plot":
     drawPlot()

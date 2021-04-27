@@ -2,14 +2,11 @@
 import os
 from git.repo import Repo
 import json
-from sys import platform
+import sys
 
-if platform == "darwin":
-    work_dir = "/Users/tannpopo/Documents/Study/ChangeLint/repo"
-    stats_dir = "."
-else:
-    work_dir = "/home/repos"
-    stats_dir = "/home/yuailun/quick_remedy_commits"
+work_dir = sys.argv[1]
+stats_dir = sys.argv[2]
+repo_list = sys.argv[3]
 
 QRCommits_cnt = 0
 
@@ -96,7 +93,6 @@ def getQRCommits(repo_name):
 
 
 def allRepos():
-    repo_list = "/home/yuailun/repo_list"
     with open(repo_list) as list_fd:
         json_obj = json.load(list_fd)
         assert (len(json_obj) == 100)
@@ -107,9 +103,6 @@ def allRepos():
             getQRCommits(repo["owner"]["login"] + "-" + repo["name"])
 
 
-if platform == "linux":
-    allRepos()
-elif platform == "darwin":
-    getQRCommits("TeamNewPipe-NewPipe")
+allRepos()
 
 print("done. all {} commits".format(QRCommits_cnt))
