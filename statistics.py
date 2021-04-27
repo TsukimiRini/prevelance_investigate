@@ -43,7 +43,7 @@ def check(repo_obj):
         branch_name = b.name.split('/')[1]
         repo.git.checkout('-B', branch_name, b.name)
         commits = list(repo.iter_commits('remotes/' + b.name))
-        commit_total = len(commits)
+        # commit_total = len(commits)
         for idx, commit in enumerate(commits):
             xml_cnt = 0
             kot_jav_cnt = 0
@@ -53,6 +53,8 @@ def check(repo_obj):
                 continue
             else:
                 shas.add(str(commit))
+
+            commit_total += 1
 
             # if idx == len(commits)-1:
             file_list = list(commit.stats.files)
