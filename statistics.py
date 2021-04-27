@@ -108,10 +108,6 @@ def allRepos():
                 os.path.join(work_dir,
                              repo["owner"]["login"] + "-" + repo["name"])))
             check(repo)
-    newsheet.write(row + 1, 0, changed_files_cnt)
-    newsheet.write(row + 1, 1, commit_cnt)
-    newsheet.write(row + 1, 3, all_changed_cnt)
-    newsheet.write(row + 1, 4, all_commit_cnt)
     wb.save('stats_res.xls')
 
 
