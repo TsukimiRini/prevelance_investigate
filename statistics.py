@@ -5,6 +5,7 @@ import xlwt
 import sys
 
 work_dir = sys.argv[1]
+repo_list = sys.argv[2]
 row = 0
 wb = xlwt.Workbook(encoding='utf-8')
 newsheet = wb.add_sheet('sheet1', cell_overwrite_ok=True)
@@ -99,7 +100,6 @@ def check(repo_obj):
 
 
 def allRepos():
-    repo_list = sys.argv[2]
     with open(repo_list) as list_fd:
         json_obj = json.load(list_fd)
         assert (len(json_obj) == 100)
@@ -108,6 +108,8 @@ def allRepos():
                 os.path.join(work_dir,
                              repo["owner"]["login"] + "-" + repo["name"])))
             check(repo)
+    newsheet.write(row + 1, 0, "average multilang percentage")
+    newsheet.write(row + 1, 1, xlwt.Formula('AVERAGE(E2:E101)'))
     wb.save('stats_res.xls')
 
 
