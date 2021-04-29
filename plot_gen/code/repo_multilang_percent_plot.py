@@ -5,9 +5,9 @@ import csv
 import seaborn as sns
 import pandas as pd
 import sys
+from matplotlib import pyplot
 
 if sys.argv[1] == "plot":
-    work_dir = sys.argv[2]
     csv_dir = "../csv"
     plot_dir = "../plots"
 elif sys.argv[1] == "data":
@@ -115,16 +115,20 @@ def allRepos():
 def drawPlot():
     sns.set_theme(style="ticks", palette="pastel")
     data = pd.read_csv(os.path.join(csv_dir, "multi-lang-percent.csv"))
+    fig, ax = pyplot.subplots(figsize=(6, 3.5))
     plot = sns.histplot(data=data,
                         y="percentage",
                         binwidth=10,
                         binrange=(0, 80),
-                        color="#7a95c4")
+                        color="#7a95c4",
+                        ax=ax)
+    # plot.set(ymargin=3)
     # plot.set_ylim(bottom=0)
     ylabels = ['{:,.0f}'.format(x) + '%' for x in plot.get_yticks()]
     plot.set_yticklabels(ylabels)
-    plot.set(xlabel="Number of repositories",
-             ylabel="Percentage of multi-lang commits")
+    plot.set_xlabel(xlabel="Number of repositories", fontsize=13)
+    plot.set_ylabel(ylabel="Percentage of multi-lang commits", fontsize=14)
+    fig.tight_layout()
     fig = plot.get_figure()
     fig.savefig(os.path.join(plot_dir, "multi-lang-percent.png"))
 

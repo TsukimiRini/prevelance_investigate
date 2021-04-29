@@ -323,7 +323,7 @@ def drawPie():
                labels,
                loc='center left',
                bbox_to_anchor=(-0.1, 0.2),
-               fontsize=12)
+               fontsize=11)
 
     ax1.axis(
         'equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
