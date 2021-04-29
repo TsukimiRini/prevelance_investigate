@@ -329,7 +329,7 @@ def drawPie():
         'equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
     fig = ax1.get_figure()
     fig.savefig(os.path.join(plot_dir, "bag_of_words.png"),
-                bbox_inches='tight')
+                bbox_inches='tight', dpi=300)
 
 
 rearrangeData()

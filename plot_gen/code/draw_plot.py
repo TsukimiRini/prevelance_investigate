@@ -32,7 +32,7 @@ for metric in metric_type:
     plot.set_xlabel("")
     f.tight_layout()
     fig = plot.get_figure()
-    fig.savefig(os.path.join(plot_dir, metric + ".png"))
+    fig.savefig(os.path.join(plot_dir, metric + ".png"), dpi=300)
     fig.clf()
 # for metric in metric_type:
 #     sns.set_theme(style="whitegrid")

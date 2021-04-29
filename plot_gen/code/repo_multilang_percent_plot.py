@@ -130,7 +130,7 @@ def drawPlot():
     plot.set_ylabel(ylabel="Percentage of multi-lang commits", fontsize=14)
     fig.tight_layout()
     fig = plot.get_figure()
-    fig.savefig(os.path.join(plot_dir, "multi-lang-percent.png"))
+    fig.savefig(os.path.join(plot_dir, "multi-lang-percent.png"), dpi=300)
 
 
 if sys.argv[1] == "data":
