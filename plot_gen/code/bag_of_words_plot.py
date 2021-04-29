@@ -222,12 +222,12 @@ def stemDictStats():
 
 
 commit_types = {
-    "NewFeature": [
+    "Feature Addition": [
         "add", "additional", "new", "create", "initial", "feature", "feat",
         "task", "function", "support", "implement", "develop", "completed",
         "complete", "work", "start", "intent", "introduce"
     ],
-    "UI/resource changes": [
+    "UI/Resource Change": [
         "view", "show", "activity", "activities", "fragment", "dialog",
         "button", "ui", "icon", "screen", "bar", "menu", "color", "user",
         "name", "layout", "option", "thumbnail", "image", "background",
@@ -237,7 +237,7 @@ commit_types = {
         "hub", "folder", "feed", "notification", "text", "title", "settings",
         "setting", "resource", "camera"
     ],
-    "Maintenance": [
+    "Improvement": [
         "update", "modify", "change", "changed", "edit", "make", "made", "use",
         "api", "module", "custom", "improvement", "improve", "better", "class",
         "set", "adapt"
@@ -247,22 +247,22 @@ commit_types = {
         "cleanup", "clean", "delete", "unused", "sort", "tidy", "replace",
         "enable", "disable", "switch", "select", "refresh", "allow"
     ],
-    "Reformat":
+    "Reformatting":
     ["reformat", "formatter", "format", "whitespace", "white", "space"],
     "Bugfix": [
-        "fix", "close", "issue", "bug", "error", "revert", "extractor",
-        "crash", "resolve", "resolved", "issued", "handling", "handle",
-        "minor", "major", "minor", "fatal"
+        "fix", "close", "issue", "bug", "error", "revert", "exception", 
+        "defect", "vulnerablity", "fault", "flaw", "crash", "resolve", 
+        "resolved", "issued", "handling", "handle", "minor", "major", "fatal"
     ],
-    "Branch/tag related": [
+    "Branch/Tag Operation": [
         "merge", "pull", "branch", "master", "dev", "rc", "conflict", "tag",
         "release"
     ],
-    "Dependecy related": [
+    "Dependency Change": [
         "library", "version", "dependence", "dependent", "upgrade", "crypt",
         "encrypt", "encrypted", "decrypt", "outdated"
     ],
-    "Document/config": [
+    "Document/Config Change": [
         "readme", "doc", "comment", "data", "log", "markdown", "md", "website",
         "web", "date", "time", "link", "mail", "account", "info",
         "description", "translate", "keyword", "configure", "configuration"
@@ -323,7 +323,7 @@ def drawPie():
                labels,
                loc='center left',
                bbox_to_anchor=(-0.1, 0.2),
-               fontsize=8)
+               fontsize=12)
 
     ax1.axis(
         'equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
