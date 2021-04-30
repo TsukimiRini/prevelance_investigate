@@ -17,7 +17,6 @@ newsheet.write(row, 4, "percent")
 
 commit_cnt = 0
 changed_files_cnt = 0
-all_commit_cnt = 0
 all_changed_cnt = 0
 
 
@@ -25,7 +24,6 @@ def check(repo_obj):
     global row
     global commit_cnt
     global changed_files_cnt
-    global all_commit_cnt
     global all_changed_cnt
 
     repo_name = repo_obj["owner"]["login"] + "-" + repo_obj["name"]
@@ -45,14 +43,15 @@ def check(repo_obj):
         commits = list(repo.iter_commits('remotes/' + b.name))
         # commit_total = len(commits)
         for idx, commit in enumerate(commits):
-            xml_cnt = 0
-            kot_jav_cnt = 0
-            all_commit_cnt += 1
-
             if str(commit) in shas:
                 continue
             else:
                 shas.add(str(commit))
+            if len(commit.parents) > 1:
+                continue
+
+            xml_cnt = 0
+            kot_jav_cnt = 0
 
             commit_total += 1
 

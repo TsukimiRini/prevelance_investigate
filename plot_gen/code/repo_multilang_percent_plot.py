@@ -6,6 +6,7 @@ import seaborn as sns
 import pandas as pd
 import sys
 from matplotlib import pyplot
+import numpy as np
 
 if sys.argv[1] == "plot":
     csv_dir = "../csv"
@@ -13,6 +14,7 @@ if sys.argv[1] == "plot":
 elif sys.argv[1] == "data":
     work_dir = sys.argv[2]
     csv_dir = "../csv"
+    repo_list = sys.argv[3]
 row = 0
 
 commit_cnt = 0
@@ -50,6 +52,8 @@ def check(repo_obj):
                 continue
             else:
                 shas.add(str(commit))
+            if len(commit.parents) > 1:
+                continue
             commit_total += 1
             xml_cnt = 0
             kot_jav_cnt = 0
@@ -91,7 +95,6 @@ def check(repo_obj):
 
 
 def allRepos():
-    repo_list = "/home/yuailun/repo_list"
     with open(repo_list) as list_fd:
         json_obj = json.load(list_fd)
         assert (len(json_obj) == 100)
@@ -112,6 +115,30 @@ def allRepos():
             csv_writer.writerow([i[0], i[1]])
 
 
+def show_values_on_bars(axs, h_v="v", space=0.4):
+    def _show_on_single_plot(ax):
+        if h_v == "v":
+            for p in ax.patches:
+                _x = p.get_x() + p.get_width() / 2
+                _y = p.get_y() + p.get_height()
+                value = int(p.get_height())
+                ax.text(_x, _y, value, ha="center")
+        elif h_v == "h":
+            for p in ax.patches:
+                _x = p.get_x() + p.get_width() + float(space)
+                _y = p.get_y() + p.get_height() - 8
+                value = int(p.get_width())
+                if value == 0:
+                    continue
+                ax.text(_x, _y, value, ha="left")
+
+    if isinstance(axs, np.ndarray):
+        for idx, ax in np.ndenumerate(axs):
+            _show_on_single_plot(ax)
+    else:
+        _show_on_single_plot(axs)
+
+
 def drawPlot():
     sns.set_theme(style="ticks", palette="pastel")
     data = pd.read_csv(os.path.join(csv_dir, "multi-lang-percent.csv"))
@@ -119,15 +146,17 @@ def drawPlot():
     plot = sns.histplot(data=data,
                         y="percentage",
                         binwidth=10,
-                        binrange=(0, 80),
+                        binrange=(0, 90),
                         color="#7a95c4",
                         ax=ax)
     # plot.set(ymargin=3)
     # plot.set_ylim(bottom=0)
+    plot.set_yticks([0, 10, 20, 30, 40, 50, 60, 70, 80, 90])
     ylabels = ['{:,.0f}'.format(x) + '%' for x in plot.get_yticks()]
     plot.set_yticklabels(ylabels)
     plot.set_xlabel(xlabel="Number of repositories", fontsize=13)
     plot.set_ylabel(ylabel="Percentage of multi-lang commits", fontsize=14)
+    show_values_on_bars(plot, 'h', 0.3)
     fig.tight_layout()
     fig = plot.get_figure()
     fig.savefig(os.path.join(plot_dir, "multi-lang-percent.png"), dpi=300)
