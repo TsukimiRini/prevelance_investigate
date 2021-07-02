@@ -17,14 +17,21 @@ def forOneRepo(owner, repo_name):
 
     repo_cross_commit_cnt = 0
     repo_commit_cnt = 0
+    repo = Repo(os.path.join(repo_dir, owner + "-" + repo_name))
+    pairs = set()
     with open(
             os.path.join(szz_dir, repo_name, "results",
                          "fix_and_introducers_pairs.json"), 'r') as fd:
         content = fd.read()
         array = json.loads(content)
         for pair in array:
+            fix_commit = pair[0]
             bug_commit = pair[1]
-            repo = Repo(os.path.join(repo_dir, owner + "-" + repo_name))
+            p = (fix_commit, bug_commit)
+            if p in pairs:
+                continue
+            else:
+                pairs.add(p)
             commit = repo.commit(bug_commit)
 
             xml_cnt = 0
@@ -59,7 +66,7 @@ def all():
     for line in lines:
         owner, filename = line.split(" ")
         forOneRepo(owner, filename)
-    print(16*'=')
+    print(16 * '=')
     print("cross-lang: {}, all: {}".format(commit_cross, all_commit_cnt))
 
 

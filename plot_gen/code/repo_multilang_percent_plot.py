@@ -1,4 +1,5 @@
 import os
+from textwrap import wrap
 from git.repo import Repo
 import json
 import csv
@@ -142,7 +143,7 @@ def show_values_on_bars(axs, h_v="v", space=0.4):
 def drawPlot():
     sns.set_theme(style="ticks", palette="pastel")
     data = pd.read_csv(os.path.join(csv_dir, "multi-lang-percent.csv"))
-    fig, ax = pyplot.subplots(figsize=(6, 3.5))
+    fig, ax = pyplot.subplots(figsize=(6, 3))
     plot = sns.histplot(data=data,
                         y="percentage",
                         binwidth=10,
@@ -154,10 +155,11 @@ def drawPlot():
     plot.set_yticks([0, 10, 20, 30, 40, 50, 60, 70, 80, 90])
     ylabels = ['{:,.0f}'.format(x) + '%' for x in plot.get_yticks()]
     plot.set_yticklabels(ylabels)
-    plot.set_xlabel(xlabel="Number of repositories", fontsize=13)
-    plot.set_ylabel(ylabel="Percentage of multi-lang commits", fontsize=14)
+    plot.set_xlabel(xlabel="Number of repositories", fontsize=13, weight='bold', wrap=True)
+    plot.set_ylabel(ylabel="Percentage of multi-lang commits", fontsize=13, weight='bold', wrap=True)
     show_values_on_bars(plot, 'h', 0.3)
     fig.tight_layout()
+    fig.subplots_adjust(left=0.15)
     fig = plot.get_figure()
     fig.savefig(os.path.join(plot_dir, "multi-lang-percent.png"), dpi=300)
 
